@@ -24,7 +24,7 @@ public class MySurfaceView extends SurfaceView implements Runnable, SurfaceHolde
     private Canvas canvasM;
     private Thread threadM;
     private boolean isWork;
-    private long sleeptime = 50;
+    private long sleeptime = 10;
 
     private Bitmap bitmapM1;
     private ArrayList<Point> arrayList;
@@ -66,15 +66,15 @@ public class MySurfaceView extends SurfaceView implements Runnable, SurfaceHolde
 
                 break;
             case MotionEvent.ACTION_MOVE:
-                point.x = (int) event.getX();
-                point.y = (int) event.getY();
-                arrayList.add(point);
-
+//                point.x = (int) event.getX();
+//                point.y = (int) event.getY();
+//                arrayList.add(point);
                 break;
             case MotionEvent.ACTION_DOWN:
                 point.x = (int) event.getX();
                 point.y = (int) event.getY();
                 arrayList.add(point);
+                Log.i(T, Thread.currentThread().getName() + "          main");
                 break;
             default:
         }
@@ -110,16 +110,17 @@ public class MySurfaceView extends SurfaceView implements Runnable, SurfaceHolde
         for (int i = 0; i < arrayList.size(); i++) {
             int x = arrayList.get(i).x;
             int y = arrayList.get(i).y;
-            if (y < 50) {
+            if (y < 500) {
                 arrayList.remove(i);
             }
+            System.out.println(arrayList.size() + "---size");
 
             //测试循环
-            for (int ii = 0; ii < 30000000; ii++) {
-                if (ii == 200000) {
-                    System.out.println("300000-------------");
-                }
-            }
+//            for (int ii = 0; ii < 30000000; ii++) {
+//                if (ii == 200000) {
+//                    System.out.println("300000-------------");
+//                }
+//            }
         }
     }
 
@@ -129,7 +130,7 @@ public class MySurfaceView extends SurfaceView implements Runnable, SurfaceHolde
         for (int i = 0; i < arrayList.size(); i++) {
             int x = arrayList.get(i).x;
             int y = arrayList.get(i).y;
-            matrixM.setTranslate(x, y = y - 50);
+            matrixM.setTranslate(x, y = y - 10);
             canvas.drawBitmap(bitmapM1, matrixM, paint);
             arrayList.set(i, new Point(x, y));
         }
@@ -159,7 +160,7 @@ public class MySurfaceView extends SurfaceView implements Runnable, SurfaceHolde
             if (e - s < sleeptime) {
                 try {
                     Thread.sleep(sleeptime - (e - s));
-                    System.out.println(sleeptime - (e - s) + "-----");
+//                    System.out.println(sleeptime - (e - s) + "-----");
                 } catch (InterruptedException e1) {
                     e1.printStackTrace();
                 }

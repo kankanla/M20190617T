@@ -8,6 +8,9 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Message;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
@@ -26,6 +29,8 @@ public class MySurfaceView extends SurfaceView implements Runnable, SurfaceHolde
     private Bitmap bitmapM1;
     private ArrayList<Point> arrayList;
 
+    private HandlerThread handlerThread;
+    private Handler handler;
 
     public MySurfaceView(Context context) {
         super(context);
@@ -37,30 +42,39 @@ public class MySurfaceView extends SurfaceView implements Runnable, SurfaceHolde
     public void init() {
         bitmapM1 = BitmapFactory.decodeResource(getResources(), R.mipmap.a2);
         arrayList = new ArrayList<>();
+
+        handlerThread = new HandlerThread("LogThread");
+        handlerThread.start();
+        Handler.Callback callback = new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message msg) {
+//                Log.i(T, "###  callback");
+//                Log.i(T, Thread.currentThread().getName());
+//                Log.i(T, Thread.activeCount() +"  cound");
+                Log();
+                return false;
+            }
+        };
+        handler = new Handler(handlerThread.getLooper(), callback);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-//        Log.i(T, "### onTouchEvent");
         Point point = new Point();
         switch (event.getAction()) {
             case MotionEvent.ACTION_UP:
 
                 break;
             case MotionEvent.ACTION_MOVE:
-                Log.i(T, "ACTION_MOVE");
                 point.x = (int) event.getX();
                 point.y = (int) event.getY();
                 arrayList.add(point);
-                System.out.println(arrayList.size());
 
                 break;
             case MotionEvent.ACTION_DOWN:
-                Log.i(T, "ACTION_MOVE");
                 point.x = (int) event.getX();
                 point.y = (int) event.getY();
                 arrayList.add(point);
-                System.out.println(arrayList.size());
                 break;
             default:
         }
@@ -84,30 +98,29 @@ public class MySurfaceView extends SurfaceView implements Runnable, SurfaceHolde
         isWork = false;
     }
 
-    //    private Matrix matrixM;
+    private Matrix matrixM;
     private Paint paint;
 
     {
         paint = new Paint();
-//        matrixM = new Matrix();
+        matrixM = new Matrix();
     }
 
     private void Log() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                System.out.println(Thread.currentThread().getName());
-                for (int i = 0; i < arrayList.size(); i++) {
-                    int x = arrayList.get(i).x;
-                    int y = arrayList.get(i).y;
-                    if (y < 50) {
-                        arrayList.remove(i);
-                    }
+        for (int i = 0; i < arrayList.size(); i++) {
+            int x = arrayList.get(i).x;
+            int y = arrayList.get(i).y;
+            if (y < 50) {
+                arrayList.remove(i);
+            }
+
+            //测试循环
+            for (int ii = 0; ii < 30000000; ii++) {
+                if (ii == 200000) {
+                    System.out.println("300000-------------");
                 }
             }
-        }) {
-        }.start();
-        System.out.println(Thread.currentThread().getName());
+        }
     }
 
     private void MyDraw1(Canvas canvas) {
@@ -116,7 +129,6 @@ public class MySurfaceView extends SurfaceView implements Runnable, SurfaceHolde
         for (int i = 0; i < arrayList.size(); i++) {
             int x = arrayList.get(i).x;
             int y = arrayList.get(i).y;
-            Matrix matrixM = new Matrix();
             matrixM.setTranslate(x, y = y - 50);
             canvas.drawBitmap(bitmapM1, matrixM, paint);
             arrayList.set(i, new Point(x, y));
@@ -128,7 +140,8 @@ public class MySurfaceView extends SurfaceView implements Runnable, SurfaceHolde
         canvasM = surfaceHolderM.lockCanvas();
         if (isWork && canvasM != null) {
             try {
-                Log();
+                handler.sendEmptyMessage(12);  //Thread 执行，画面更新快
+//                Log();    // 直接执行  画面更新慢
                 MyDraw1(canvasM);
             } catch (Exception e) {
             } finally {
@@ -136,7 +149,6 @@ public class MySurfaceView extends SurfaceView implements Runnable, SurfaceHolde
             }
         }
     }
-
 
     @Override
     public void run() {
@@ -147,6 +159,7 @@ public class MySurfaceView extends SurfaceView implements Runnable, SurfaceHolde
             if (e - s < sleeptime) {
                 try {
                     Thread.sleep(sleeptime - (e - s));
+                    System.out.println(sleeptime - (e - s) + "-----");
                 } catch (InterruptedException e1) {
                     e1.printStackTrace();
                 }

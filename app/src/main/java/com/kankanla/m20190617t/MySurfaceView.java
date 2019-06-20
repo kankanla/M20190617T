@@ -28,6 +28,7 @@ public class MySurfaceView extends SurfaceView implements Runnable, SurfaceHolde
 
     private Bitmap bitmapM1;
     private ArrayList<Point> arrayList;
+    private ArrayList<Integer> arrayListRandom;
 
     private HandlerThread handlerThread;
     private Handler handler;
@@ -42,15 +43,13 @@ public class MySurfaceView extends SurfaceView implements Runnable, SurfaceHolde
     public void init() {
         bitmapM1 = BitmapFactory.decodeResource(getResources(), R.mipmap.a2);
         arrayList = new ArrayList<>();
+        arrayListRandom = new ArrayList<>();
 
         handlerThread = new HandlerThread("LogThread");
         handlerThread.start();
         Handler.Callback callback = new Handler.Callback() {
             @Override
             public boolean handleMessage(Message msg) {
-//                Log.i(T, "###  callback");
-//                Log.i(T, Thread.currentThread().getName());
-//                Log.i(T, Thread.activeCount() +"  cound");
                 Log();
                 return false;
             }
@@ -63,18 +62,16 @@ public class MySurfaceView extends SurfaceView implements Runnable, SurfaceHolde
         Point point = new Point();
         switch (event.getAction()) {
             case MotionEvent.ACTION_UP:
-
                 break;
             case MotionEvent.ACTION_MOVE:
-//                point.x = (int) event.getX();
-//                point.y = (int) event.getY();
-//                arrayList.add(point);
+//
+
                 break;
             case MotionEvent.ACTION_DOWN:
                 point.x = (int) event.getX();
                 point.y = (int) event.getY();
                 arrayList.add(point);
-                Log.i(T, Thread.currentThread().getName() + "          main");
+                arrayListRandom.add((Integer) (int) (Math.random() * (5 - 8) + 8));
                 break;
             default:
         }
@@ -103,6 +100,7 @@ public class MySurfaceView extends SurfaceView implements Runnable, SurfaceHolde
 
     {
         paint = new Paint();
+        paint.setColor(Color.RED);
         matrixM = new Matrix();
     }
 
@@ -112,29 +110,24 @@ public class MySurfaceView extends SurfaceView implements Runnable, SurfaceHolde
             int y = arrayList.get(i).y;
             if (y < 500) {
                 arrayList.remove(i);
+                arrayListRandom.remove(i);
             }
-            System.out.println(arrayList.size() + "---size");
-
-            //测试循环
-//            for (int ii = 0; ii < 30000000; ii++) {
-//                if (ii == 200000) {
-//                    System.out.println("300000-------------");
-//                }
-//            }
         }
     }
 
     private void MyDraw1(Canvas canvas) {
-        canvas.save();
-        canvas.drawColor(Color.WHITE);
         for (int i = 0; i < arrayList.size(); i++) {
             int x = arrayList.get(i).x;
             int y = arrayList.get(i).y;
-            matrixM.setTranslate(x, y = y - 10);
+            matrixM.setTranslate(x, y = y - arrayListRandom.get(i));
             canvas.drawBitmap(bitmapM1, matrixM, paint);
             arrayList.set(i, new Point(x, y));
         }
-        canvas.restore();
+    }
+
+    private void MyDraw2(Canvas canvas) {
+
+        canvas.drawLine(0, 500, getWidth(), 500, paint);
     }
 
     private void MyDrawWork() {
@@ -143,7 +136,11 @@ public class MySurfaceView extends SurfaceView implements Runnable, SurfaceHolde
             try {
                 handler.sendEmptyMessage(12);  //Thread 执行，画面更新快
 //                Log();    // 直接执行  画面更新慢
+                canvasM.save();
+                canvasM.drawColor(Color.WHITE);
                 MyDraw1(canvasM);
+                MyDraw2(canvasM);
+                canvasM.restore();
             } catch (Exception e) {
             } finally {
                 surfaceHolderM.unlockCanvasAndPost(canvasM);

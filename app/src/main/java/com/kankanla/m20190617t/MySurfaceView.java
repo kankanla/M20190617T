@@ -8,6 +8,10 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
@@ -20,24 +24,30 @@ import java.util.ArrayList;
 
 public class MySurfaceView extends SurfaceView implements Runnable, SurfaceHolder.Callback {
     private final String T = "### MySurfaceView";
+    private Context context;
     private SurfaceHolder surfaceHolderM;
-    private Canvas canvasM;
-    private Thread threadM;
+    protected Canvas canvasM;
+    protected Thread threadM;
     private boolean isWork;
-    private long sleeptime = 10;
+    protected long sleeptime = 10;
 
     private Bitmap bitmapM1;
     private ArrayList<Point> arrayList;
     private ArrayList<Integer> arrayListRandom;
 
-    private HandlerThread handlerThread;
+    protected HandlerThread handlerThread;
     private Handler handler;
+
+    protected SensorManager sensorManagerM;
+    protected Sensor sensorM;
 
     public MySurfaceView(Context context) {
         super(context);
+        this.context = context;
         surfaceHolderM = this.getHolder();
         surfaceHolderM.addCallback(this);
         init();
+        Sensor_init();
     }
 
     public void init() {
@@ -57,6 +67,38 @@ public class MySurfaceView extends SurfaceView implements Runnable, SurfaceHolde
         handler = new Handler(handlerThread.getLooper(), callback);
     }
 
+    private void Sensor_init() {
+        sensorManagerM = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
+        sensorM = sensorManagerM.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensorManagerM.registerListener(new SensorEventListener() {
+            @Override
+            public void onSensorChanged(SensorEvent event) {
+                switch (event.sensor.getType()) {
+                    case Sensor.TYPE_ACCELEROMETER:
+//                        Log.i(T, event.values[0] + "x");
+                        if (event.values[2] < -40 || event.values[2] > 40) {
+                            Log.i(T, event.values[2] + "zzzzzzzzzzzzzzzzzz");
+                        }
+                        break;
+                    case Sensor.TYPE_ALL:
+                        break;
+                    default:
+                }
+            }
+
+            @Override
+            public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+            }
+        }, sensorM, SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+
+    @Override
+    public boolean performClick() {
+        return super.performClick();
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         Point point = new Point();
@@ -64,7 +106,6 @@ public class MySurfaceView extends SurfaceView implements Runnable, SurfaceHolde
             case MotionEvent.ACTION_UP:
                 break;
             case MotionEvent.ACTION_MOVE:
-//
 
                 break;
             case MotionEvent.ACTION_DOWN:
@@ -75,6 +116,7 @@ public class MySurfaceView extends SurfaceView implements Runnable, SurfaceHolde
                 break;
             default:
         }
+        performClick();
         return true;
     }
 
@@ -108,7 +150,7 @@ public class MySurfaceView extends SurfaceView implements Runnable, SurfaceHolde
         for (int i = 0; i < arrayList.size(); i++) {
             int x = arrayList.get(i).x;
             int y = arrayList.get(i).y;
-            if (y < 500) {
+            if (y < 200) {
                 arrayList.remove(i);
                 arrayListRandom.remove(i);
             }
@@ -127,7 +169,7 @@ public class MySurfaceView extends SurfaceView implements Runnable, SurfaceHolde
 
     private void MyDraw2(Canvas canvas) {
 
-        canvas.drawLine(0, 500, getWidth(), 500, paint);
+        canvas.drawLine(0, 200, getWidth(), 200, paint);
     }
 
     private void MyDrawWork() {

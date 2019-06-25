@@ -47,10 +47,10 @@ public class MySurfaceView extends SurfaceView implements Runnable, SurfaceHolde
         surfaceHolderM = this.getHolder();
         surfaceHolderM.addCallback(this);
         init();
-        Sensor_init();
     }
 
     public void init() {
+        /*http://icooon-mono.com/*/
         bitmapM1 = BitmapFactory.decodeResource(getResources(), R.mipmap.a2);
         arrayList = new ArrayList<>();
         arrayListRandom = new ArrayList<>();
@@ -75,10 +75,6 @@ public class MySurfaceView extends SurfaceView implements Runnable, SurfaceHolde
             public void onSensorChanged(SensorEvent event) {
                 switch (event.sensor.getType()) {
                     case Sensor.TYPE_ACCELEROMETER:
-//                        Log.i(T, event.values[0] + "x");
-                        if (event.values[2] < -40 || event.values[2] > 40) {
-                            Log.i(T, event.values[2] + "zzzzzzzzzzzzzzzzzz");
-                        }
                         break;
                     case Sensor.TYPE_ALL:
                         break;
@@ -93,7 +89,6 @@ public class MySurfaceView extends SurfaceView implements Runnable, SurfaceHolde
         }, sensorM, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
-
     @Override
     public boolean performClick() {
         return super.performClick();
@@ -106,7 +101,6 @@ public class MySurfaceView extends SurfaceView implements Runnable, SurfaceHolde
             case MotionEvent.ACTION_UP:
                 break;
             case MotionEvent.ACTION_MOVE:
-
                 break;
             case MotionEvent.ACTION_DOWN:
                 point.x = (int) event.getX();
@@ -168,7 +162,6 @@ public class MySurfaceView extends SurfaceView implements Runnable, SurfaceHolde
     }
 
     private void MyDraw2(Canvas canvas) {
-
         canvas.drawLine(0, 200, getWidth(), 200, paint);
     }
 
